@@ -8,20 +8,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![allow(transmute_from_fn_item_types)]
+// aux-build:issue-39889.rs
 
-use std::mem;
+#![feature(proc_macro)]
+#![allow(unused)]
 
-fn main() {
-    unsafe {
-        let u = mem::transmute(main);
-        let p = mem::transmute(main);
-        let f = mem::transmute(main);
-        let tuple: (usize, *mut (), fn()) = (u, p, f);
-        assert_eq!(mem::transmute::<_, [usize; 3]>(tuple), [main as usize; 3]);
+extern crate issue_39889;
+use issue_39889::Issue39889;
 
-        mem::transmute::<_, usize>(main);
-        mem::transmute::<_, *mut ()>(main);
-        mem::transmute::<_, fn()>(main);
-    }
-}
+#[derive(Issue39889)]
+struct S;
+
+fn main() {}
