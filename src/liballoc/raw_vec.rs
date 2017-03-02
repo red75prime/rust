@@ -82,6 +82,25 @@ impl<T> RawVec<T> {
     ///
     /// Aborts on OOM
     pub fn with_capacity(cap: usize) -> Self {
+        match RawVec::try_with_capacity(cap) {
+            Some(rv) => rv,
+            None => oom(),
+        }
+    }
+
+    /// Tries to create a RawVec with exactly the capacity and alignment requirements
+    /// for a `[T; cap]`. This is equivalent to calling RawVec::new when `cap` is 0
+    /// or T is zero-sized. Note that if `T` is zero-sized this means you will *not*
+    /// get a RawVec with the requested capacity!
+    ///
+    /// # Panics
+    ///
+    /// * Panics if the requested capacity exceeds `usize::MAX` bytes.
+    /// * Panics on 32-bit platforms if the requested capacity exceeds
+    ///   `isize::MAX` bytes.
+    ///
+    #[unstable(feature = "fallible_alloc", issue = "29802")]
+    pub fn try_with_capacity(cap: usize) -> Option<Self> {
         unsafe {
             let elem_size = mem::size_of::<T>();
 
@@ -95,15 +114,15 @@ impl<T> RawVec<T> {
                 let align = mem::align_of::<T>();
                 let ptr = heap::allocate(alloc_size, align);
                 if ptr.is_null() {
-                    oom()
+                    return None;
                 }
                 ptr
             };
 
-            RawVec {
+            Some(RawVec {
                 ptr: Unique::new(ptr as *mut _),
                 cap: cap,
-            }
+            })
         }
     }
 
@@ -607,6 +626,23 @@ mod tests {
             // factor is 2, so new capacity is 24, however, grow factor
             // of 1.5 is OK too. Hence `>= 18` in assert.
             assert!(v.cap() >= 12 + 12 / 2);
+        }
+    }
+
+    #[test] 
+    fn cant_allocate_ridiculous_amount() {
+        if mem::size_of::<usize>() > 4 {
+            match RawVec::<u8>::try_with_capacity(100_000_000_000_000) {
+                Some(rv) => {
+                    use core::ptr;
+                    let addr = (rv.ptr() as usize)+100_000_000_000;
+                    unsafe {
+                        ptr::write(addr as *mut u8, 1);
+                    };
+                    assert!(false);
+                },
+                None => (),
+            }
         }
     }
 

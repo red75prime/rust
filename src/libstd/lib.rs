@@ -253,6 +253,7 @@
 #![feature(core_intrinsics)]
 #![feature(dropck_eyepatch)]
 #![feature(exact_size_is_empty)]
+#![feature(fallible_alloc)]
 #![feature(float_extras)]
 #![feature(float_from_str_radix)]
 #![feature(fn_traits)]

@@ -38,6 +38,7 @@
 #![feature(core_intrinsics)]
 #![feature(dropck_eyepatch)]
 #![feature(exact_size_is_empty)]
+#![feature(fallible_alloc)]
 #![feature(fmt_internals)]
 #![feature(fused)]
 #![feature(generic_param_attrs)]

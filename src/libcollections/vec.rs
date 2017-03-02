@@ -358,6 +358,31 @@ impl<T> Vec<T> {
         }
     }
 
+    /// Tries to construct a new, empty `Vec<T>` with the specified capacity.
+    /// If out-of-memory condition occurs, this function returns None.
+    ///
+    /// The vector will be able to hold exactly `capacity` elements without
+    /// reallocating. If `capacity` is 0, the vector will not allocate.
+    ///
+    /// It is important to note that this function does not specify the *length*
+    /// of the returned vector, but only the *capacity*. For an explanation of
+    /// the difference between length and capacity, see *[Capacity and reallocation]*.
+    ///
+    /// [Capacity and reallocation]: #capacity-and-reallocation
+    ///
+    #[inline]
+    #[unstable(feature = "fallible_alloc", issue = "29802")]
+    pub fn try_with_capacity(capacity: usize) -> Option<Vec<T>> {
+        match RawVec::try_with_capacity(capacity) {
+            Some(buf) => 
+                Some(Vec {
+                    buf: buf,
+                    len: 0,
+                }),
+            None => None,
+        }
+    }
+
     /// Creates a `Vec<T>` directly from the raw components of another vector.
     ///
     /// # Safety
