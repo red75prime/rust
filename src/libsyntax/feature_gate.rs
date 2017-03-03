@@ -330,9 +330,6 @@ declare_features! (
     // Used to identify crates that contain sanitizer runtimes
     // rustc internal
     (active, sanitizer_runtime, "1.17.0", None),
-
-    // fallible Vec allocations
-    (active, fallible_alloc, "1.17.0", Some(29802)),
 );
 
 declare_features! (
