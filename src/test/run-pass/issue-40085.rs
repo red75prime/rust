@@ -1,4 +1,4 @@
-// Copyright 2014 The Rust Project Developers. See the COPYRIGHT
+// Copyright 2015 The Rust Project Developers. See the COPYRIGHT
 // file at the top-level directory of this distribution and at
 // http://rust-lang.org/COPYRIGHT.
 //
@@ -8,11 +8,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub fn main() {
-    const z: &'static isize = {
-        //~^ ERROR blocks in constants are limited to items and tail expressions
-        let p = 3;
-        //~^ ERROR blocks in constants are limited to items and tail expressions
-        &p //~ ERROR `p` does not live long enough
-    };
+use std::ops::Index;
+fn bar() {}
+static UNIT: () = ();
+struct S;
+impl Index<fn()> for S {
+    type Output = ();
+    fn index(&self, _: fn()) -> &() { &UNIT }
+}
+fn main() {
+    S.index(bar);
+    S[bar];
 }
